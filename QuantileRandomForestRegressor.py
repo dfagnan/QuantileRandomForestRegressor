@@ -17,22 +17,26 @@ class QuantileRandomForestRegressor(RandomForestRegressor):
 		#leaf_results['ind'] = 1
 		self.tree_weights = []
 		#self.leaf_values = [0]*len(leaf_results.columns)
-		for tree in leaf_results:
+		for t in leaf_results:
+			tree = leaf_results[t]
 			self.tree_weights.append({})
 			self.tree_leaf_dicts.append({})
-			for i in range(len(leaf_results[tree])):
-				#iterate through rows of observations on single tree
-				#compare observed leaf to dict -if exists append values else add key to dict
-				if(leaf_results[tree][i] in self.tree_leaf_dicts[tree]):
+			leaf_dict = self.tree_leaf_dicts[t]
+			for i in range(len(tree)):
+				obs = tree[i]
+					#iterate through rows of observations on single tree
+					#compare observed leaf to dict -if exists append values else add key to dict
+				if(obs in leaf_dict):
 					for col in self.target_columns:
+						leaf_values =leaf_dict[obs][col]
 						#leaf # is assigned values
-						self.tree_leaf_dicts[tree][leaf_results[tree][i]][col] = np.append(self.tree_leaf_dicts[tree][leaf_results[tree][i]][col],y.iloc[i][col])
+						leaf_dict[obs][col] = np.append(leaf_values,y.iloc[i][col])
 				else:
-					self.tree_leaf_dicts[tree][leaf_results[tree][i]] = {}
+					leaf_dict[obs] = {}
 					for col in self.target_columns:
 						#leaf # is assigned values
 						if(np.isfinite(y.iloc[i][col])):
-							self.tree_leaf_dicts[tree][leaf_results[tree][i]][col]=np.array(y.iloc[i][col])
+							leaf_dict[obs][col]=np.array(y.iloc[i][col])
 
 		for tree in range(len(self.tree_leaf_dicts)):
 			self.tree_weights.append({})
